@@ -1,0 +1,166 @@
+# ============================================================
+#  .NET / ASP.NET Core
+# ============================================================
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+# NuGet v3+
+*.nuget.props
+*.nuget.targets
+
+# Publish output
+**/publish/
+**/PublishProfiles/
+web.config          # generated on publish, not source
+
+# EF Core migrations — keep the Migrations/ folder but ignore the
+# compiled snapshot diff files if you regenerate often
+# (comment these two lines out if you want to commit everything)
+# **/Migrations/*_*.cs
+# **/Migrations/*ModelSnapshot.cs
+
+# ASP.NET Core Data Protection keys (runtime-generated, secret)
+**/DataProtection-Keys/
+
+# ============================================================
+#  Secrets & Configuration — NEVER commit these
+# ============================================================
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+**/*secrets*.json
+**/*secret*.json
+
+# User secrets (Visual Studio)
+**/Properties/launchSettings.json   # contains local dev ports/env vars
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# ============================================================
+#  Visual Studio
+# ============================================================
+.vs/
+*.rsuser
+*.sln.ide
+
+# Rider (JetBrains)
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# ============================================================
+#  Node / Frontend tooling (Tailwind, npm)
+# ============================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Tailwind / build output
+wwwroot/css/site.min.css
+wwwroot/js/site.min.js
+wwwroot/lib/          # Bower/LibMan output — regenerated on restore
+
+# ============================================================
+#  Uploads & User Content
+# ============================================================
+# Menu item images uploaded at runtime — store in blob storage
+# in production; ignore local copies
+wwwroot/uploads/
+wwwroot/images/menu/
+
+# ============================================================
+#  Database & Local Data
+# ============================================================
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ============================================================
+#  Docker
+# ============================================================
+# Keep Dockerfile and docker-compose.yml
+# Ignore override files with local secrets
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ============================================================
+#  OS Junk
+# ============================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+
+# ============================================================
+#  Test Results & Coverage
+# ============================================================
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+TestResults/
+
+# ============================================================
+#  Rider / ReSharper
+# ============================================================
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# ============================================================
+#  Azure / Deployment Artifacts
+# ============================================================
+.azure/
+.deployment
+deploy.cmd
