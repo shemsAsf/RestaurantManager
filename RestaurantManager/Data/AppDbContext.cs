@@ -6,11 +6,11 @@ using RestaurantManager.Models;
 
 namespace RestaurantManager.Data
 {
-    public class AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration configuration) : IdentityDbContext<IdentityUser>(options)
+    public class AppDbContext : IdentityDbContext<IdentityUser>
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
         {
-            optionsBuilder.UseNpgsql(configuration.GetConnectionString("Database"));
         }
 
         public DbSet<MenuCategory> Categories { get; set; }

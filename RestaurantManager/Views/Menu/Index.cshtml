@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "Menu";
+}
+
+@* Sticky category tab bar *@
+<div class="sticky top-16 z-40 bg-gray-50 -mx-4 px-4 py-2 border-b border-gray-200 overflow-x-auto">
+    <div class="flex gap-2 w-max">
+        @foreach (var category in Model)
+        {
+            <a href="#cat-@category.Id"
+                   class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium
+                bg-white border border-gray-200 text-gray-600
+                hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600
+                transition-colors">
+                @category.Name
+            </a>
+        }
+    </div>
+</div>
+
+@* Menu sections *@
+<div class="mt-4 flex flex-col gap-8 pb-24">
+    @foreach (var category in Model)
+    {
+        <section id="cat-@category.Id">
+            <h2 class="text-lg font-bold text-gray-800 mb-3">@category.Name</h2>
+            <div class="flex flex-col gap-3">
+                @foreach (var item in category.MenuItems)
+                {
+                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden flex gap-4 p-4">
+
+                        @* Item image *@
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl"
+                                 alt="@item.Name"
+                                 class="w-24 h-24 object-cover rounded-xl flex-shrink-0" />
+                        }
+                        else
+                        {
+                            <div class="w-24 h-24 rounded-xl flex-shrink-0 bg-gray-100
+                                flex items-center justify-center text-3xl">
+                                🍽️
+                            </div>
+                        }
+
+                        @* Item info *@
+                        <div class="flex flex-col justify-between flex-1 min-w-0">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 truncate">@item.Name</h3>
+                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">@item.Description</p>
+                            </div>
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="font-bold text-orange-500">
+                                    €@item.Price.ToString("F2")
+                                </span>
+                                <form method="post" action="/order/additem">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="menuItemId" value="@item.Id" />
+                                    <button type="submit"
+                                            class="bg-orange-500 text-white rounded-full w-9 h-9
+                                        flex items-center justify-center text-xl font-bold
+                                        hover:bg-orange-600 active:scale-95 transition-all">
+                                        +
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>

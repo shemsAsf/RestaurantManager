@@ -1,20 +1,43 @@
+using Humanizer.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RestaurantManager.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("Database") ?? throw new InvalidOperationException("Connection string 'Database' not found.");
-builder.Services.AddDbContext<AppDbContext>();
+string? connectionString = builder.Configuration.GetConnectionString("Database");
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    Console.WriteLine("Printing co string " +  connectionString);
+    options.UseNpgsql(connectionString);
+});
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    options.User.RequireUniqueEmail = false;
+    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
+    options.SignIn.RequireConfirmedAccount = false;
+})
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddSignalR();
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var db = services.GetRequiredService<AppDbContext>();
+    var users = services.GetRequiredService<UserManager<IdentityUser>>();
+    var roles = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await DbSeeder.SeedAsync(db, users, roles);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -31,13 +54,14 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Session}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.MapRazorPages()

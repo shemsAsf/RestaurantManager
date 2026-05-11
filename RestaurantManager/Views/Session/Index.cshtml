@@ -1,0 +1,37 @@
+﻿@{
+	ViewData["Title"] = "Welcome";
+	Layout = "_Layout";
+}
+
+<div class="min-h-[80dvh] flex flex-col items-center justify-center px-6">
+
+    <div class="mb-10 text-center">
+        <h1 class="text-3xl font-bold">Restaurant Name</h1>
+        <p class="text-gray-500 mt-2">Enter your table number to get started</p>
+    </div>
+
+    <form method="post" action="/session/start" class="w-full max-w-xs">
+        <label for="tableNumber" class="block text-sm font-medium text-gray-700 mb-2">
+            Table Number
+        </label>
+
+        <input type="number"
+               id="tableNumber"
+               name="tableNumber"
+               min="1"
+               max="99"
+               placeholder="e.g. 7"
+               required
+               class="w-full border border-gray-300 rounded-xl px-4 py-4 text-center
+        text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-orange-400
+        focus:border-transparent"
+               style="font-size: 1.5rem"
+        />
+
+        <button type="submit"
+                class="mt-6 w-full bg-orange-500 hover:bg-orange-600 text-white
+            font-bold py-4 rounded-xl text-lg transition-colors">
+            See the Menu →
+        </button>
+    </form>
+</div>

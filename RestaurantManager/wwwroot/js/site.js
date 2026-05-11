@@ -1,4 +1,32 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿function basketState() {
+    return {
+        basketCount: parseInt(document.querySelector('meta[name="basket-count"]')?.content ?? '0'),
 
-// Write your JavaScript code.
+        init() {
+            document.addEventListener('basket-updated', (e) => {
+                this.basketCount = e.detail.itemCount;
+            });
+        }
+    }
+}
+
+const tableNumber = document.querySelector('meta[name="table-number"]')?.content;
+
+if (tableNumber) {
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/hubs/table")
+        .withAutomaticReconnect()
+        .build();
+
+    connection.on("BasketUpdated", (data) => {
+        document.dispatchEvent(new CustomEvent('basket-updated', { detail: data }));
+    });
+
+    connection.on("SessionClosed", () => {
+        window.location.href = "/session/ended";
+    });
+
+    connection.start()
+        .then(() => connection.invoke("JoinTable", tableNumber))
+        .catch(err => console.error("SignalR connection failed:", err));
+}
