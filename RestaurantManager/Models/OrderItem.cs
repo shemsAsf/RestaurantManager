@@ -9,5 +9,7 @@
         public MenuItem MenuItem { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
+        public OrderStatus Status { get; set; } = OrderStatus.Draft;
     }
+    public enum OrderStatus { Draft, Placed, Done }
 }

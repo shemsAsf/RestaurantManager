@@ -21,9 +21,8 @@ namespace RestaurantManager.Controllers
                 ViewData["HasSession"] = true;
                 ViewData["TableNumber"] = session.TableNumber;
 
-                var basketCount = await _db.Orders
-                    .Where(o => o.SessionId == session.Id && o.Status == OrderStatus.Draft)
-                    .SelectMany(o => o.Items)
+                var basketCount = await _db.OrderItems
+                    .Where(o => o.Order.SessionId == session.Id && o.Status == OrderStatus.Draft)
                     .SumAsync(i => i.Quantity);
 
                 ViewData["BasketCount"] = basketCount;
