@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 string? connectionString = builder.Configuration.GetConnectionString("Database");
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    Console.WriteLine("Printing co string " +  connectionString);
     options.UseNpgsql(connectionString);
 });
 
