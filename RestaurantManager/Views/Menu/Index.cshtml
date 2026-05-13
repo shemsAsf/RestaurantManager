@@ -2,7 +2,12 @@
     ViewData["Title"] = "Menu";
 }
 
+<script>
+    const initialQuantities = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Quantities));
+</script>
+
 @* Table indicator + change button *@
+<div class="flex items-center justify-between py-2 mb-1">
     <span class="text-sm text-gray-500">
         Table <span class="font-semibold text-gray-800">@ViewData["TableNumber"]</span>
     </span>
@@ -19,7 +24,7 @@
 @* Sticky category tab bar *@
 <div class="sticky top-16 z-40 bg-gray-50 -mx-4 px-4 py-2 border-b border-gray-200 overflow-x-auto">
     <div class="flex gap-2 w-max">
-        @foreach (var category in Model)
+        @foreach (var category in Model.Categories)
         {
             <a href="#cat-@category.Id"
                    class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium
@@ -34,14 +39,16 @@
 
 @* Menu sections *@
 <div class="mt-4 flex flex-col gap-8 pb-24">
-    @foreach (var category in Model)
+    @foreach (var category in Model.Categories)
     {
         <section id="cat-@category.Id">
             <h2 class="text-lg font-bold text-gray-800 mb-3">@category.Name</h2>
             <div class="flex flex-col gap-3">
                 @foreach (var item in category.MenuItems)
                 {
-                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden flex gap-4 p-4">
+                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden flex gap-4 p-4"
+                         x-data="itemState(@item.Id)"
+                         x-init="init()">
 
                         @* Item image *@
                         @if (!string.IsNullOrEmpty(item.ImageUrl))
@@ -68,16 +75,23 @@
                                 <span class="font-bold text-orange-500">
                                     €@item.Price.ToString("F2")
                                 </span>
-                                <form method="post" action="/order/additem">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@item.Id" />
-                                    <button type="submit"
+                                <div class="flex items-center justify-between gap-4">
+                                    <button x-on:click="remove()"
                                             class="bg-orange-500 text-white rounded-full w-9 h-9
-                                        flex items-center justify-center text-xl font-bold
-                                        hover:bg-orange-600 active:scale-95 transition-all">
+                                            flex items-center justify-center text-xl font-bold
+                                            hover:bg-orange-600 active:scale-95 transition-all">
+                                        -
+                                    </button>
+
+                                    <span x-text="qty"> </span>
+
+                                    <button x-on:click="add()"
+                                            class="bg-orange-500 text-white rounded-full w-9 h-9
+                                            flex items-center justify-center text-xl font-bold
+                                            hover:bg-orange-600 active:scale-95 transition-all">
                                         +
                                     </button>
-                                </form>
+                                </div>
                             </div>
                         </div>
 
@@ -87,3 +101,60 @@
         </section>
     }
 </div>
+
+<script>
+    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+    function itemState(menuItemId) {
+        return {
+            qty: 0,
+            menuItemId: menuItemId,
+
+            init() {
+                this.qty = initialQuantities[this.menuItemId] ?? 0;
+
+                document.addEventListener('basket-updated', (e) => {
+                    if (e.detail.quantities && e.detail.quantities[this.menuItemId] !== undefined) {
+                        this.qty = e.detail.quantities[this.menuItemId];
+                    }
+                });
+            },
+
+            async add() {
+                this.qty++;
+                try {
+                    const res = await fetch('/order/additem', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `id=${this.menuItemId}&__RequestVerificationToken=${encodeURIComponent(token)}`
+                    });
+                    const data = await res.json();
+                    this.qty = data.quantity;
+
+                    document.dispatchEvent(new CustomEvent('basket-updated-local', { detail: { basketCount: data.basketCount } }));
+                } catch {
+                    this.qty--;
+                }
+            },
+
+            async remove() {
+                if(this.qty > 0)
+                {
+                    this.qty--;
+                    try {
+                        const res = await fetch('/order/removeitem', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `id=${this.menuItemId}&__RequestVerificationToken=${encodeURIComponent(token)}`
+                        });
+                        const data = await res.json();
+                        this.qty = data.quantity;
+                        document.dispatchEvent(new CustomEvent('basket-updated-local', { detail: { basketCount: data.basketCount } }));
+                    } catch {
+                        this.qty++;
+                    }
+                }
+            }
+        }
+    }
+</script>
