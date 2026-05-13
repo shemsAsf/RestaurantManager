@@ -7,6 +7,7 @@
         public TableSession Session { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? PlacedAt { get; set; }
-        public ICollection<OrderItem> Items { get; set; }
+        public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
+        public bool IsDraft { get; set; } = true;
     }
 }

@@ -1,4 +1,3 @@
-using Humanizer.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RestaurantManager.Data;

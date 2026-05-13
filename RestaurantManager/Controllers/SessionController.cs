@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using RestaurantManager.Data;
 using RestaurantManager.Extensions;
 using RestaurantManager.Models;
-using System.Diagnostics;
 
 namespace RestaurantManager.Controllers
 {
@@ -64,6 +63,14 @@ namespace RestaurantManager.Controllers
         {
             Response.Cookies.Delete("SessionId");
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ChangeTable()
+        {
+            Response.Cookies.Delete("SessionId");
+            return RedirectToAction("Index");
         }
     }
 }
