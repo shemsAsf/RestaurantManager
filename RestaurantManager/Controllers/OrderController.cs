@@ -60,7 +60,39 @@ namespace RestaurantManager.Controllers
             }
 
             await _db.SaveChangesAsync();
-            return RedirectToAction("Index", "Menu");
+
+            return Json(new { menuItemId = id, quantity = existing?.Quantity ?? 1, basketCount = draft.Items.Sum(i => i.Quantity) });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveItem(int id)
+        {
+            var session = await HttpContext.GetCurrentSessionAsync(_db);
+            if (session == null)
+                return RedirectToAction("Index", "Session");
+
+            var menuItem = await _db.MenuItems
+               .FirstOrDefaultAsync(m => m.Id == id && m.IsAvailable);
+
+            if (menuItem == null)
+                return RedirectToAction("Index", "Menu");
+
+            var draft = await _db.Orders
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(o => o.SessionId == session.Id && o.IsDraft);
+
+            if (draft == null)
+                return RedirectToAction("Index", "Menu");
+
+            var existing = draft.Items.FirstOrDefault(i => i.MenuItemId == id);
+
+            if (existing == null || existing.Quantity <= 0)
+                return RedirectToAction("Index", "Menu");
+
+            existing.Quantity--;
+            await _db.SaveChangesAsync();
+            return Json(new { menuItemId = id, quantity = existing?.Quantity ?? 1, basketCount = draft.Items.Sum(i => i.Quantity) });
         }
     }
 }

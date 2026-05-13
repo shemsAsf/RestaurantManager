@@ -3,8 +3,12 @@
         basketCount: parseInt(document.querySelector('meta[name="basket-count"]')?.content ?? '0'),
 
         init() {
+            document.addEventListener('basket-updated-local', (e) => {
+                this.basketCount = e.detail.basketCount;
+            });
+
             document.addEventListener('basket-updated', (e) => {
-                this.basketCount = e.detail.itemCount;
+                this.basketCount = e.detail.basketCount;
             });
         }
     }

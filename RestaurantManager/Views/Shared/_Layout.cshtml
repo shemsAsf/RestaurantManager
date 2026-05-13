@@ -6,15 +6,13 @@
     <title>@ViewData["Title"] - Restaurant</title>
     <script type="importmap"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="~/RestaurantManager.styles.css" asp-append-version="true" />
-
-    @if (ViewData["HasSession"] is true)
-    {
-        <meta name="table-number" content="@ViewData["TableNumber"]" />
-        <meta name="basket-count" content="@ViewData["BasketCount"]" />
-    }
-
 </head>
+@if (ViewData["HasSession"] is true)
+{
+    <meta name="basket-count" content="@ViewData["BasketCount"]" />
+}
 <body>
     <header class="sticky top-0 z-50 bg-white shadow-sm px-4 py-3 flex items-center justify-between">
         <span class="font-bold text-lg">Restaurant Name</span>
@@ -22,8 +20,7 @@
             {
             <a href="/basket" class="relative">
                 <img class="h-10" src="/images/basket.svg" alt="Basket">
-                <span x-show="basketCount > 0"
-                      x-text="basketCount"
+                <span x-text="basketCount"
                       class="absolute -top-1 -right-1 bg-red-500 text-white text-xs
                     rounded-full w-5 h-5 flex items-center justify-center">
                 </span>
@@ -41,18 +38,15 @@
                 flex justify-around items-center h-16 z-50">
             <a href="/menu" class="flex flex-col items-center text-xs gap-1
                                 @(ViewData["ActiveTab"]?.ToString() == "menu" ? "text-orange-500" : "text-gray-500")">
-                <svg .../> Menu
+                Menu
             </a>
             <a href="/basket" class="flex flex-col items-center text-xs gap-1 relative
                                     @(ViewData["ActiveTab"]?.ToString() == "basket" ? "text-orange-500" : "text-gray-500")">
-                <svg .../> Basket
-                <span x-show="basketCount > 0" x-text="basketCount"
-                class="absolute top-0 right-3 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                </span>
+                Basket
             </a>
             <a href="/order/history" class="flex flex-col items-center text-xs gap-1
                                             @(ViewData["ActiveTab"]?.ToString() == "orders" ? "text-orange-500" : "text-gray-500")">
-                <svg .../> Orders
+                Orders
             </a>
         </nav>
     }
