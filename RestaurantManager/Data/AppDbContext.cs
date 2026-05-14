@@ -27,6 +27,10 @@ namespace RestaurantManager.Data
             builder.Entity<OrderItem>()
                 .Property(o => o.UnitPrice)
                 .HasColumnType("decimal(10,2)");
+            builder.Entity<Order>()
+                .HasIndex(o => o.SessionId)
+                .HasFilter("\"IsDraft\" = true")
+                .IsUnique();
         }
     }
 }

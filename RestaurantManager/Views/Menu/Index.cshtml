@@ -12,7 +12,6 @@
         Table <span class="font-semibold text-gray-800">@ViewData["TableNumber"]</span>
     </span>
     <form method="post" action="/session/changetable">
-        @Html.AntiForgeryToken()
         <button type="submit"
                 class="text-xs text-orange-500 border border-orange-300 rounded-full
             px-3 py-1 hover:bg-orange-50 transition-colors">
@@ -102,59 +101,6 @@
     }
 </div>
 
-<script>
-    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-    function itemState(menuItemId) {
-        return {
-            qty: 0,
-            menuItemId: menuItemId,
-
-            init() {
-                this.qty = initialQuantities[this.menuItemId] ?? 0;
-
-                document.addEventListener('basket-updated', (e) => {
-                    if (e.detail.quantities && e.detail.quantities[this.menuItemId] !== undefined) {
-                        this.qty = e.detail.quantities[this.menuItemId];
-                    }
-                });
-            },
-
-            async add() {
-                this.qty++;
-                try {
-                    const res = await fetch('/order/additem', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `id=${this.menuItemId}&__RequestVerificationToken=${encodeURIComponent(token)}`
-                    });
-                    const data = await res.json();
-                    this.qty = data.quantity;
-
-                    document.dispatchEvent(new CustomEvent('basket-updated-local', { detail: { basketCount: data.basketCount } }));
-                } catch {
-                    this.qty--;
-                }
-            },
-
-            async remove() {
-                if(this.qty > 0)
-                {
-                    this.qty--;
-                    try {
-                        const res = await fetch('/order/removeitem', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: `id=${this.menuItemId}&__RequestVerificationToken=${encodeURIComponent(token)}`
-                        });
-                        const data = await res.json();
-                        this.qty = data.quantity;
-                        document.dispatchEvent(new CustomEvent('basket-updated-local', { detail: { basketCount: data.basketCount } }));
-                    } catch {
-                        this.qty++;
-                    }
-                }
-            }
-        }
-    }
-</script>
+@section Scripts {
+    <script src="~/js/order.js" asp-append-version="true"></script>
+}

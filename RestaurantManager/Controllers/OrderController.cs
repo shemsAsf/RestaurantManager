@@ -70,29 +70,64 @@ namespace RestaurantManager.Controllers
         {
             var session = await HttpContext.GetCurrentSessionAsync(_db);
             if (session == null)
-                return RedirectToAction("Index", "Session");
+                return Json(new { error = "no_session" });
 
             var menuItem = await _db.MenuItems
                .FirstOrDefaultAsync(m => m.Id == id && m.IsAvailable);
 
             if (menuItem == null)
-                return RedirectToAction("Index", "Menu");
+                return Json(new { error = "item_not_found" });
 
             var draft = await _db.Orders
                 .Include(o => o.Items)
                 .FirstOrDefaultAsync(o => o.SessionId == session.Id && o.IsDraft);
 
             if (draft == null)
-                return RedirectToAction("Index", "Menu");
+                return Json(new { error = "draft_not_found" });
 
             var existing = draft.Items.FirstOrDefault(i => i.MenuItemId == id);
 
             if (existing == null || existing.Quantity <= 0)
-                return RedirectToAction("Index", "Menu");
+                return Json(new { error = "item_not_in_basket" });
 
             existing.Quantity--;
+
+            if (existing.Quantity == 0)
+                draft.Items.Remove(existing);
+
             await _db.SaveChangesAsync();
             return Json(new { menuItemId = id, quantity = existing?.Quantity ?? 1, basketCount = draft.Items.Sum(i => i.Quantity) });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveAllItem(int id)
+        {
+            var session = await HttpContext.GetCurrentSessionAsync(_db);
+            if (session == null)
+                return Json(new { error = "no_session" });
+
+            var menuItem = await _db.MenuItems
+               .FirstOrDefaultAsync(m => m.Id == id && m.IsAvailable);
+
+            if (menuItem == null)
+                return Json(new { error = "item_not_found" });
+
+            var draft = await _db.Orders
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(o => o.SessionId == session.Id && o.IsDraft);
+
+            if (draft == null)
+                return Json(new { error = "draft_not_found" });
+
+            var existing = draft.Items.FirstOrDefault(i => i.MenuItemId == id);
+
+            if (existing == null)
+                return Json(new { error = "item_not_in_basket" });
+
+            draft.Items.Remove(existing);
+            await _db.SaveChangesAsync();
+            return Json(new { menuItemId = id, quantity = 0, basketCount = draft.Items.Sum(i => i.Quantity) });
         }
     }
 }

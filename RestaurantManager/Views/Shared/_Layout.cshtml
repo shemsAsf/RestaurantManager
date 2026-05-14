@@ -14,6 +14,9 @@
     <meta name="basket-count" content="@ViewData["BasketCount"]" />
 }
 <body>
+    <div style="display:none">
+        @Html.AntiForgeryToken()
+    </div>
     <header class="sticky top-0 z-50 bg-white shadow-sm px-4 py-3 flex items-center justify-between">
         <span class="font-bold text-lg">Restaurant Name</span>
             @if (ViewData["HasSession"] is true)

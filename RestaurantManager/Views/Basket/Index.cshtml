@@ -1,0 +1,66 @@
+﻿@model RestaurantManager.ViewModels.BasketViewModel
+@{
+	ViewData["Title"] = "Basket";
+}
+
+<script>
+    const initialQuantities = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.Items.ToDictionary(i => i.MenuItemId, i => i.Quantity)
+    ));
+</script>
+<div>
+@if (!Model.Items.Any())
+{
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+        <div class="text-6xl mb-4">🛒</div>
+        <h2 class="text-lg font-semibold text-gray-700 mb-1">Your basket is empty</h2>
+        <p class="text-sm text-gray-400 mb-6">Add some items from the menu to get started.</p>
+        <a href="/menu"
+           class="bg-orange-500 text-white text-sm font-semibold px-6 py-2.5
+                  rounded-full hover:bg-orange-600 active:scale-95 transition-all">
+            Browse Menu
+        </a>
+    </div>
+}
+else
+{
+	@foreach (var item in Model.Items)
+	{
+        <div class="bg-white rounded-2xl shadow-sm flex justify-between"
+            x-data="itemState(@item.MenuItemId)"
+            x-init="init()"
+            x-show="qty > 0">
+
+            <h3 class="font-semibold text-gray-900 truncate">
+                @item.Name x<span x-text="qty"></span>
+            </h3>
+
+            <div class="flex justify-between">
+
+                <button x-on:click="remove()"
+                        class="w-8 h-8
+                    flex items-center justify-center text-lg font-bold
+                    hover:text-red-600 active:scale-95 transition-all">
+                    −
+                </button>
+                <button x-on:click="add()"
+                        class="w-8 h-8
+                    flex items-center justify-center text-lg font-bold
+                    hover:text-green-600 active:scale-95 transition-alll">
+                    +
+                </button>
+                        
+                <button x-on:click="removeAll()"
+                        class="w-8 h-8
+                    flex items-center justify-center text-lg font-bold
+                    hover:text-red-600 active:scale-95 transition-all">
+                    x
+                </button>
+            </div>
+		</div>
+	}
+}
+</div>
+@section Scripts {
+    <script src="~/js/order.js" asp-append-version="true"></script>
+}
