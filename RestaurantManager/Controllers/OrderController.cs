@@ -129,5 +129,35 @@ namespace RestaurantManager.Controllers
             await _db.SaveChangesAsync();
             return Json(new { menuItemId = id, quantity = 0, basketCount = draft.Items.Sum(i => i.Quantity) });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PlaceOrder()
+        {
+            var session = await HttpContext.GetCurrentSessionAsync(_db);
+            if (session == null)
+                return RedirectToAction("Index", "Session");
+
+            var draft = await _db.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.MenuItem)
+                .FirstOrDefaultAsync(o => o.SessionId == session.Id && o.IsDraft);
+
+            if (draft == null || !draft.Items.Any())
+                return RedirectToAction("Index");
+
+            foreach (var item in draft.Items)
+                item.UnitPrice = item.MenuItem.Price;
+
+            draft.IsDraft = false;
+            draft.PlacedAt = DateTime.UtcNow;
+
+            foreach (var item in draft.Items)
+                item.Status = OrderStatus.Placed;
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Basket");
+        }
     }
 }

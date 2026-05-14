@@ -2,10 +2,12 @@
 {
     public class BasketViewModel
     {
-        public List<BasketItemViewModel> Items { get; set; }
+        public List<ItemViewModel> BasketItems { get; set; }
+        public List<ItemViewModel> PreviousOrderItems { get; set; }
+        public decimal Total { get; set; } = 0;
     }
 
-    public class BasketItemViewModel
+    public class ItemViewModel
     {
         public int MenuItemId { get; set; }
         public string Name { get; set; }

@@ -25,14 +25,32 @@ namespace RestaurantManager.Controllers
                 .ThenInclude(i => i.MenuItem)
                 .FirstOrDefaultAsync(o => o.SessionId == session.Id && o.IsDraft);
 
-            BasketViewModel bvm = new BasketViewModel {
-                Items = draft?.Items.Select(i => new BasketItemViewModel()
+            var previousOrders = await _db.Orders
+                .Where(o => o.SessionId == session.Id && !o.IsDraft)
+                .SelectMany(o => o.Items)
+                .Include(i => i.MenuItem)
+                .GroupBy(i => i.MenuItemId)
+                .Select(i => new ItemViewModel()
+                {
+                    MenuItemId = i.Key,
+                    Name = i.First().MenuItem.Name,
+                    UnitPrice = i.First().MenuItem.Price,
+                    Quantity = i.Sum(it => it.Quantity),
+                })
+                .ToListAsync();
+
+            BasketViewModel bvm = new BasketViewModel
+            {
+                BasketItems = draft?.Items.Select(i => new ItemViewModel()
                 {
                     MenuItemId = i.MenuItem.Id,
                     Name = i.MenuItem.Name,
                     UnitPrice = i.UnitPrice,
                     Quantity = i.Quantity,
-                }).ToList() ?? []
+                }).ToList() ?? [],
+
+                PreviousOrderItems = previousOrders,
+                Total = previousOrders.Sum(i => i.Quantity * i.UnitPrice),
             };
 
             return View(bvm);
