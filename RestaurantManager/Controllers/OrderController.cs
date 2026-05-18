@@ -1,16 +1,30 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using RestaurantManager.Data;
 using RestaurantManager.Extensions;
+using RestaurantManager.Hubs;
 using RestaurantManager.Models;
 
 namespace RestaurantManager.Controllers
 {
     public class OrderController : CustomerControllerBase
     {
-        public OrderController(AppDbContext db) : base(db)
+        private readonly IHubContext<TableHub> _hub;
+        public OrderController(AppDbContext db, IHubContext<TableHub> hub) : base(db)
         {
+            _hub = hub;
+        }
+
+        private async Task BroadcastBasketUpdate(int sessionId, string tableNumber, List<OrderItem> items)
+        {
+            var quantities = items.ToDictionary(i => i.MenuItemId, i => i.Quantity);
+            var basketCount = items.Sum(i => i.Quantity);
+
+            await _hub.Clients
+                .Group($"table-{tableNumber}")
+                .SendAsync("BasketUpdated", new { quantities, basketCount });
         }
 
         [HttpPost]
@@ -60,6 +74,7 @@ namespace RestaurantManager.Controllers
             }
 
             await _db.SaveChangesAsync();
+            await BroadcastBasketUpdate(session.Id, session.TableNumber.ToString(), draft.Items.ToList());
 
             return Json(new { menuItemId = id, quantity = existing?.Quantity ?? 1, basketCount = draft.Items.Sum(i => i.Quantity) });
         }
@@ -96,6 +111,8 @@ namespace RestaurantManager.Controllers
                 draft.Items.Remove(existing);
 
             await _db.SaveChangesAsync();
+            await BroadcastBasketUpdate(session.Id, session.TableNumber.ToString(), draft.Items.ToList());
+
             return Json(new { menuItemId = id, quantity = existing?.Quantity ?? 1, basketCount = draft.Items.Sum(i => i.Quantity) });
         }
 
@@ -126,7 +143,10 @@ namespace RestaurantManager.Controllers
                 return Json(new { error = "item_not_in_basket" });
 
             draft.Items.Remove(existing);
+
             await _db.SaveChangesAsync();
+            await BroadcastBasketUpdate(session.Id, session.TableNumber.ToString(), draft.Items.ToList());
+
             return Json(new { menuItemId = id, quantity = 0, basketCount = draft.Items.Sum(i => i.Quantity) });
         }
 
@@ -156,6 +176,9 @@ namespace RestaurantManager.Controllers
                 item.Status = OrderStatus.Placed;
 
             await _db.SaveChangesAsync();
+            await _hub.Clients
+                .Group($"table-{session.TableNumber}")
+                .SendAsync("OrderPlaced");
 
             return RedirectToAction("Index", "Basket");
         }

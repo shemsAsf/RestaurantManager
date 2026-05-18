@@ -6,12 +6,14 @@
     <title>@ViewData["Title"] - Restaurant</title>
     <script type="importmap"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.0/dist/browser/signalr.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="~/RestaurantManager.styles.css" asp-append-version="true" />
 </head>
 @if (ViewData["HasSession"] is true)
 {
     <meta name="basket-count" content="@ViewData["BasketCount"]" />
+    <meta name="table-number" content="@ViewData["TableNumber"]" />
 }
 <body>
     <div style="display:none">

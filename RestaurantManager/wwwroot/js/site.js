@@ -23,7 +23,13 @@ if (tableNumber) {
         .build();
 
     connection.on("BasketUpdated", (data) => {
-        document.dispatchEvent(new CustomEvent('basket-updated', { detail: data }));
+        document.dispatchEvent(new CustomEvent('basket-updated', { detail: { quantities: data.quantities, basketCount: data.basketCount } }));
+    });
+
+    connection.on("OrderPlaced", () => {
+        if (window.location.pathname.toLowerCase().includes('/basket')) {
+            window.location.reload();
+        }
     });
 
     connection.on("SessionClosed", () => {
@@ -33,4 +39,6 @@ if (tableNumber) {
     connection.start()
         .then(() => connection.invoke("JoinTable", tableNumber))
         .catch(err => console.error("SignalR connection failed:", err));
+
+    window.tableConnection = connection;
 }

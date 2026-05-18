@@ -20,6 +20,7 @@ namespace RestaurantManager.Controllers
                 return RedirectToAction("Index", "Session");
 
             ViewData["ActiveTab"] = "menu";
+            ViewData["TableNumber"] = session.TableNumber;
 
             var categories = await GetMenuAsync();
             var quantities = await GetItemQuantitiesAsync(session.Id);

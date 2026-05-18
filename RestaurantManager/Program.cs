@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RestaurantManager.Data;
+using RestaurantManager.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,5 +65,7 @@ app.MapControllerRoute(
 
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.MapHub<TableHub>("/hubs/table");
 
 app.Run();
